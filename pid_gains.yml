@@ -1,7 +1,7 @@
 # translational 
 kp_x: 0.
 kp_y: 0.
-kp_z: 0.
+kp_z: 1
 #-----
 ki_x: 0
 ki_y: 0
@@ -9,7 +9,7 @@ ki_z: 0
 #-----
 kd_x: 0.
 kd_y: 0.
-kd_z: 0.
+kd_z: 1.5
 #-----
 
 # rotational 
