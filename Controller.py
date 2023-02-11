@@ -63,8 +63,6 @@ class Controller3D():
         """
         U = np.array([0.,0.,0.,0.])
 
-        print(setpoint.z_acc)
-
         # Translation
         e_z = setpoint.z_pos - state.z_pos
         e_z_dot = setpoint.z_vel - state.z_vel
@@ -76,17 +74,15 @@ class Controller3D():
         e_y_dot = setpoint.y_vel - state.y_vel
         self.e_y_total += e_y
 
-        z_dotdot = self.kp_z * e_z + self.ki_z * self.e_z_total + self.kd_z * e_z_dot
+        z_dotdot = setpoint.z_acc + self.kp_z * e_z + self.ki_z * self.e_z_total + self.kd_z * e_z_dot
 
         U[0] = self.params.mass * (z_dotdot + self.params.g)
 
-        x_dotdot = self.kp_x * e_x + self.ki_x * self.e_x_total + self.kd_x * e_x_dot
-        y_dotdot = self.kp_y * e_y + self.ki_y * self.e_y_total + self.kd_y * e_y_dot
+        x_dotdot = setpoint.x_acc + self.kp_x * e_x + self.ki_x * self.e_x_total + self.kd_x * e_x_dot
+        y_dotdot = setpoint.y_acc + self.kp_y * e_y + self.ki_y * self.e_y_total + self.kd_y * e_y_dot
 
         phi_d = (1/self.params.g) * (x_dotdot * np.sin(state.psi) - y_dotdot * np.cos(state.psi))
         theta_d = (1/self.params.g) * (x_dotdot * np.cos(state.psi) + y_dotdot * np.sin(state.psi))
-
-        # psi_d?
 
         e_phi = phi_d - state.phi
         e_p = -1 * state.p
@@ -98,12 +94,8 @@ class Controller3D():
         e_r = setpoint.r - state.r
         self.e_psi_total += e_psi
 
-        U[1] = self.kp_phi * e_phi + self.kd_p * e_p + self.ki_phi * self.e_phi_total
-        U[2] = self.kp_theta * e_theta + self.kd_q * e_q + self.ki_theta * self.e_theta_total
-        U[3] = self.kp_psi * e_psi + self.kd_r * e_r + self.ki_psi * self.e_psi_total
-
-        # print(U)
-
-        # U = np.array([self.params.mass * self.params.g,0.,0.,0.])
+        U[1] = self.params.I[0,0] * (self.kp_phi * e_phi + self.kd_p * e_p + self.ki_phi * self.e_phi_total)
+        U[2] = self.params.I[1,1] * (self.kp_theta * e_theta + self.kd_q * e_q + self.ki_theta * self.e_theta_total)
+        U[3] = self.params.I[2,2] * (setpoint.r_dot + self.kp_psi * e_psi + self.kd_r * e_r + self.ki_psi * self.e_psi_total)
 
         return U
